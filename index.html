@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drawing Tool</title>
+    <link rel="stylesheet" href="style.css" />
+
+    <script type="text/javascript" src="js/paper-full.js"></script>
+    <script type="text/paperscript" canvas="canvas">
+      window.app = {
+          line: new Tool({
+              onMouseDown: function(event){
+                  path = new Path();
+                  path.strokeColor = 'black';
+                  path.add(event.point);
+              },
+              onMouseDrag: function(event) {
+                  path.add(event.point);
+                  path.on('doubleclick', function(){
+                    this.remove();
+                  })
+                }
+          }),
+
+          circle: new Tool({
+              onMouseDrag: function(event) {
+                      path = new Path.Circle({
+                      center: event.downPoint,
+                      radius: (event.downPoint - event.point),
+                      fillColor: "blue",
+                      strokeColor: "black",
+                    });
+                    path.removeOnDrag();
+                    path.on('doubleclick', function(){
+                      this.remove();
+                    })
+              }
+          }),
+
+          selector: new Tool({
+              onMouseDrag: function(event) {
+                path.position += event.delta;
+              },
+          }),
+
+          square: new Tool({
+              onMouseDrag: function(event) {
+                path = new Path.Rectangle({
+                  from: event.downPoint,
+                  to: event.point,
+                  fillColor: 'orange',
+                  strokeColor: 'black'
+              });
+              path.removeOnDrag();
+                path.on('doubleclick', function(){
+                  this.remove();
+                })
+            }
+        }),
+      };
+    </script>
+  </head>
+  <body>
+    <div class="toolBar">
+      <div class="tools">
+        <a
+          href="#"
+          onclick="app.line.activate(); return false;"
+          class="toolBtn active"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <path
+              d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z"
+            />
+          </svg>
+          <span class="tooltiptext">
+            <p>Line</p>
+          </span>
+        </a>
+        <a
+          href="#"
+          onclick="app.circle.activate(); return false;"
+          class="toolBtn"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <path
+              d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z"
+            />
+          </svg>
+          <span class="tooltiptext">
+            <p>Circle</p>
+          </span>
+        </a>
+        <a
+          href="#"
+          onclick="app.selector.activate(); return false"
+          class="toolBtn"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+            style="transform: rotate(-10deg); margin-left: 20%"
+          >
+            <path
+              d="M0 55.2V426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320H297.9c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"
+            />
+          </svg>
+          <span class="tooltiptext">
+            <p>Pointer</p>
+          </span>
+        </a>
+        <a
+          href="#"
+          onclick="app.square.activate(); return false"
+          class="toolBtn"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+            <path
+              d="M384 80c8.8 0 16 7.2 16 16V416c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V96c0-8.8 7.2-16 16-16H384zM64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64z"
+            />
+          </svg>
+          <span class="tooltiptext">
+            <p>Square</p>
+          </span>
+        </a>
+      </div>
+    </div>
+    <canvas id="canvas" resize></canvas>
+    <script src="js/script.js"></script>
+  </body>
+</html>
