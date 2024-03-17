@@ -8,18 +8,30 @@
 
     <script type="text/javascript" src="js/paper-full.js"></script>
     <script type="text/paperscript" canvas="canvas">
+      var paintColor = "transparent";
+
+      window.changeColor =  function(color) {
+        paintColor = color;
+      };
+
       window.app = {
           line: new Tool({
               onMouseDown: function(event){
                   path = new Path();
-                  path.strokeColor = 'black';
+                  path.strokeColor = paintColor;
+                  path.strokeWidth = 3;
                   path.add(event.point);
               },
               onMouseDrag: function(event) {
+                if(event.modifiers.shift) {
+                  path.lastSegment.point = event.point;
+                  path.simplify();
+                }else{
                   path.add(event.point);
-                  path.on('doubleclick', function(){
-                    this.remove();
-                  })
+                }
+                path.on('doubleclick', function(){
+                  this.remove();
+                })
                 }
           }),
 
@@ -28,8 +40,9 @@
                       path = new Path.Circle({
                       center: event.downPoint,
                       radius: (event.downPoint - event.point),
-                      fillColor: "blue",
+                      fillColor: paintColor,
                       strokeColor: "black",
+                      strokeWidth: 3,
                     });
                     path.removeOnDrag();
                     path.on('doubleclick', function(){
@@ -39,18 +52,40 @@
           }),
 
           selector: new Tool({
-              onMouseDrag: function(event) {
-                path.position += event.delta;
-              },
-          }),
+            onMouseDrag: function(event) {
+              project.activeLayer.children.filter(function(item){
+                if(item.hitTest(event.point)){
+                  item.position += event.delta;
+                }
+                item.on('mousedrag', function(event){
+                if(event.modifiers.control){
+                  var distFromBottomToPos = item.bounds.bottomRight.getDistance(item.bounds.topLeft);
+                  var distFromPointToPos = event.point.getDistance(item.bounds.topLeft);
+                  var scale = distFromPointToPos / distFromBottomToPos;
+                  item.scale(scale, item.bounds.topLeft);
+                }
+              })
+              })
+            },
+            onMouseDown: function(event){
+              project.activeLayer.children.filter(function(item){
+                if(item.hitTest(event.point)){
+                  removeSelection();
+                  item.selected = true;
+                  item.bounds.selected = true;
+                }
+              })
+            },
+        }),
 
           square: new Tool({
               onMouseDrag: function(event) {
                 path = new Path.Rectangle({
                   from: event.downPoint,
                   to: event.point,
-                  fillColor: 'orange',
-                  strokeColor: 'black'
+                  fillColor: paintColor,
+                  strokeColor: 'black',
+                  strokeWidth: 3,
               });
               path.removeOnDrag();
                 path.on('doubleclick', function(){
@@ -59,6 +94,17 @@
             }
         }),
       };
+
+      function removeSelection(){
+        project.activeLayer.children.filter(function(item){
+            item.selected = false;
+            item.bounds.selected = false;
+        })
+      }
+
+      window.undo = function(){
+        project.activeLayer.removeChildren();
+      }
     </script>
   </head>
   <body>
@@ -75,7 +121,7 @@
             />
           </svg>
           <span class="tooltiptext">
-            <p>Line</p>
+            <p>Pencil</p>
           </span>
         </a>
         <a
@@ -122,6 +168,28 @@
           </svg>
           <span class="tooltiptext">
             <p>Square</p>
+          </span>
+        </a>
+        <a href="#" class="toolBtn">
+          <div class="color">
+            <input
+              type="color"
+              id="pen-color"
+              onclick="changeColor(this.value);"
+            />
+          </div>
+          <span class="tooltiptext">
+            <p>color</p>
+          </span>
+        </a>
+        <a href="#" onclick="undo()" class="toolBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <path
+              d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"
+            />
+          </svg>
+          <span class="tooltiptext">
+            <p>clear</p>
           </span>
         </a>
       </div>

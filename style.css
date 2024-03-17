@@ -98,6 +98,11 @@ canvas[resize] {
   fill: orange;
 }
 
+#pen-color {
+  width: 30px;
+  height: 30px;
+}
+
 @media screen and (max-width: 500px) {
   .toolBar {
     width: 100%;
